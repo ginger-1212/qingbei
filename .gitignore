@@ -1,0 +1,23 @@
+# Local/generated caches
+__pycache__/
+*.pyc
+
+# Render/output scratch folders
+outputs/
+render_out/
+render_ia_integrated/
+work/
+
+# Temporary validation artifacts
+index-script-check.js
+
+# Large/intermediate document-processing artifacts
+*.docx
+*_dump.txt
+*_extract.txt
+reference_pdf_text.txt
+source_docx_paras*.txt
+tail_extract.txt
+
+# Local backups
+index_导入题库前备份.html

@@ -1,0 +1,25 @@
+{
+  "source_dir": "C:\\Users\\Administrator\\Desktop\\知识点\\02试题整理\\整理好的",
+  "app_file": "C:\\Users\\Administrator\\Documents\\exam\\index.html",
+  "backup": "C:\\Users\\Administrator\\Documents\\exam\\index_导入题库前备份.html",
+  "other_out": "C:\\Users\\Administrator\\Desktop\\知识点\\02试题整理\\整理好的\\其他题_未导入应用.txt",
+  "imported_count": 852,
+  "other_count": 30,
+  "duplicates_skipped": 121,
+  "by_type": {
+    "single": 584,
+    "multiple": 268
+  },
+  "by_business": {
+    "AA": 67,
+    "BA": 527,
+    "IA": 52,
+    "data-governance": 26,
+    "product-design": 131,
+    "digital-transformation": 49
+  },
+  "other_by_business": {
+    "AA": 25,
+    "BA": 5
+  }
+}
