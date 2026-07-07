@@ -1,0 +1,472 @@
+{
+  "existing_count": 852,
+  "candidate_count": 169,
+  "imported_count": 24,
+  "skipped_duplicate_count": 145,
+  "updated_count": 876,
+  "source_counts": {
+    "xlsx:IA": 54,
+    "xlsx:BA": 50,
+    "xlsx:AA": 60,
+    "docx": 5
+  },
+  "imported_by_business": {
+    "IA": 3,
+    "BA": 5,
+    "AA": 16
+  },
+  "imported_by_type": {
+    "single": 19,
+    "multiple": 5
+  },
+  "docx_classification": [
+    {
+      "question": "下图描述的是什么内容？",
+      "business": "AA",
+      "scores": {
+        "IA": 10,
+        "BA": 20,
+        "AA": 40
+      }
+    },
+    {
+      "question": "技术团队抱怨业务提出的“新零售场景”往往流程各异且断点频出。为了消灭断点，正确的应对武器是：",
+      "business": "BA",
+      "scores": {
+        "IA": 10,
+        "BA": 20,
+        "AA": 0
+      }
+    },
+    {
+      "question": "企业若要在复杂多变的竞争环境中实现可持续增长，往往需要突破传统行业边界，进行跨界创新。这种创新并非简单的资源嫁接或渠道融合，而是基于对用户需求本质的深度洞察，打破原有价值网络，实现多领域能力、资源与场景的系统性重组。那么，跨界创新的核心究竟是什么？",
+      "business": "BA",
+      "scores": {
+        "IA": 0,
+        "BA": 0,
+        "AA": 0
+      }
+    },
+    {
+      "question": "业务指标的识别原则包括?",
+      "business": "BA",
+      "scores": {
+        "IA": 0,
+        "BA": 0,
+        "AA": 0
+      }
+    },
+    {
+      "question": "中国一汽为解决数智化转型“最后一公里”的问题，提出了？",
+      "business": "BA",
+      "scores": {
+        "IA": 0,
+        "BA": 30,
+        "AA": 0
+      }
+    }
+  ],
+  "skipped_duplicates_sample": [
+    {
+      "question": "在进行逻辑实体/属性定义时，第三范式要求任何非标识符属性不依赖于其他非标识符属性。以下哪项不符合第三范式？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "在设计逻辑实体和属性时，若某个属性有固定的枚举值，并且这些枚举值可能会在多个场景应用，建议设计单独的逻辑数据实体。",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "所有关键数据仅能在数据源录入、修改，全流程共享，其它调用系统不能修改。下游环节发现的数据源质量问题，应当在进行修正。",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "以下哪种情况属于\"数据标准不一致\"的问题？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "基于各数据分类的定义，你认为\"采购订单\"属于哪类数据？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "以下哪项不属于数据分布的内容？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "根据数据源定义，以下哪项符合\"数据源\"的核心特征？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "某企业发现\"供应商联系方式\"在销售系统中显示错误，经排查发现错误源于该数据在数据源（SCM系统）中的录入错误。根据数据源管理原则，正确的修正方式是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "下列不属于进行业务对象识别的过程的是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "在逻辑数据模型中，\"标识符\"的核心作用是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "信息链表示数据在业务流之间的流转关系？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "同一个供应商在同一个系统中创建了多个不同编码，这违反了数据质量的哪一性？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "同一种设备的设备编号在不同系统中不一致，这违反了数据质量的哪一性？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "以下哪个描述最适合业务对象？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "员工作为一个重要的业务对象，该业务对象的唯一身份标识是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "以下哪项最符合\"元数据是关于数据的数据\"这一核心定义？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "主题域分组管理的一个主要优势是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "是信息架构构建的前提？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "设计逻辑数据实体主键时需遵循主键长期稳定原则，下列字段最适合作为逻辑数据实体主键的是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "假设某销售公司想要比较不同板块的产品在某一特定历史时期的销量表现，他们应该主要关注哪两个概念来构建其数据分析框架？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "关于\"口径\"和\"统计周期\"，以下说法错误的是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "关于设计指标的SMART原则，其中R代表的是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "数据探源认证中，业务过程探源主要找到的是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "指标字典中，统计口径的作用是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "以下哪个选项最准确地描述了\"度量\"的概念？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "用于观察数据分布、识别异常值的图表是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "数据仓库分层中，原样同步源系统数据的层级是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "\"最近1个月内，高端产品的销售额同比增长\"，其中\"高端产品\"属于？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "关于度量属性说法正确的是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "指标治理过程中，在匹配数据源之前不需完成哪些步骤？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "在指标数据治理中，认证数据源时，最可能作为数据源？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "以下哪些属于业务能力的责任层级？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "业务单元的设计原则包括哪些？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "价值流中的\"关键触点\"通常是什么类型的节点？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "关于业务能力与业务单元的设计关注点，哪些正确？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "业务场景因子的识别依据包括哪些？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "定义逻辑数据实体的方法包括？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "关于数据标准，以下哪些描述是准确的？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "关于概念模型，描述正确的是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "在元数据注册过程中，业务元数据和技术元数据关联，指的是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "主题域的设计原则包括？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "信息架构承载了企业如何管理数据资产的方法，需要从整个企业层面制订统一的原则，这些原则不仅是对数据管理专业人员的要求，也是对业务的要求，因为业务才是真正的数据负责人。因此，公司所有业务部门都应该共同遵从信息架构原则。信息架构基本原则包括？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "基于指标字典的哪些属性进行数据项的拆解？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "关于拆解数据项，下列说法正确的是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "关于指标，下列说法正确的是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "原子指标的技术探源结果包含？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "关于拆解原子指标，下列说法正确的是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "关于度量，下列说法正确的是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "\"五阶十六步\"包含的阶段有？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "观察下列表名，在技术探源时，可以作为数据源？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "关于业务探源，下列说法错误的是？",
+      "business": "IA",
+      "source": "信息架构参考(1).xlsx"
+    },
+    {
+      "question": "业务单元与业务活动的关系是什么？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "能力流程与业务组件的主要区别是什么？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "以下哪个不属于业务单元的划分原则？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "业务能力是否可以跨价值流阶段复用？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "区别业务单元与步骤的核心依据是什么？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "能力流程架构中的L3与价值流架构中的L3是什么关系？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "以下哪项不是业务场景因子的判断标准？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "以下哪项描述业务单元的\"标准工时\"是准确的？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "在企业层面，以下哪项属于支撑类业务能力？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "业务组件与业务对象的关系是？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "以下哪个不是价值流设计的步骤？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "业务单元的角色应如何确定？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "以下哪项是\"使能\"类业务能力的特征？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "业务单元的业务规则应细化到什么程度？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "业务场景的收敛依据是什么？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "业务能力的\"指导\"层主要指什么？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "业务单元的输入物不包括什么？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "以下哪项不属于业务单元的九要素？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "业务能力的\"度量指标\"与价值流的\"灯塔指标\"关系是？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "业务单元是否可以由AI自动执行?",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "以下哪项是业务场景因子的正确取值方式？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "价值流中的\"关键触点\"是什么？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "在业务场景因子识别中，如果一个因子的不同取值会导致流程走向不同，但这些取值的判断依据是同一个业务对象的同一个属性（如\"申请金额\"分别取小于1万、1-5万、大于等于5万），以下哪种处理方式最符合架构设计原则？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "业务单元设计时，如果两个业务单元的负责角色相同、输入物相同，但输出物完全不同，应如何处理？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "以下哪项是业务能力与价值流交叉映射图的核心作用？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "以下关于业务组件描述不正确的是？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "价值流设计中的\"迁移业务对象\"与\"基于灯塔指标的业务运营\"两种变革武器，在应用时的根本区别在于？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "以下对于业务规则描述不正确的是？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    },
+    {
+      "question": "以下哪个不是业务变革TAM模型中的价值分类？",
+      "business": "BA",
+      "source": "业务架构参考(1).xlsx"
+    }
+  ],
+  "backup": "C:\\Users\\Administrator\\Documents\\exam\\index_新增ExcelDocx题目前备份.html"
+}
