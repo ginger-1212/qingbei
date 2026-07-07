@@ -1,0 +1,42 @@
+{
+  "question_count": 876,
+  "changed_count": 2,
+  "business_counts": {
+    "product-design": 112,
+    "AA": 74,
+    "IA": 42,
+    "data-governance": 135,
+    "BA": 420,
+    "digital-transformation": 93
+  },
+  "changes_sample": [
+    {
+      "id": "q0476",
+      "question": "餐饮总仓分管物料的采购活动，如果将其拆散成诸如：供应商入驻核验资质、价格谈判定准核盘、入库建卡录存，这种将独立最小单元收拢聚合归拢形成集合体的做法，能体现的特点大体在于？",
+      "from": "IA",
+      "to": "BA",
+      "scores": {
+        "digital-transformation": 0,
+        "data-governance": 0,
+        "AA": 0,
+        "product-design": 0,
+        "BA": 0,
+        "IA": 0
+      }
+    },
+    {
+      "id": "q0710",
+      "question": "NLP（自然语言处理）的常见应用场景包括？",
+      "from": "IA",
+      "to": "digital-transformation",
+      "scores": {
+        "digital-transformation": 0,
+        "data-governance": 0,
+        "AA": 0,
+        "product-design": 0,
+        "BA": 0,
+        "IA": 0
+      }
+    }
+  ]
+}
