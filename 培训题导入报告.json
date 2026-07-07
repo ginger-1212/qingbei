@@ -1,0 +1,53 @@
+{
+  "existing_count": 876,
+  "candidate_count": 210,
+  "imported_count": 210,
+  "skipped_duplicate_count": 0,
+  "updated_count": 1086,
+  "parsed_counts": {
+    "blocks:梁宁产品思维30讲_知识点与题库.docx": 70,
+    "parsed:梁宁产品思维30讲_知识点与题库.docx": 70,
+    "blocks:数据科学AI培训材料V1.0_知识点与题库.docx": 70,
+    "parsed:数据科学AI培训材料V1.0_知识点与题库.docx": 70,
+    "blocks:云原生实操培训课件_知识点与题库.docx": 70,
+    "parsed:云原生实操培训课件_知识点与题库.docx": 70
+  },
+  "imported_by_type": {
+    "single": 150,
+    "multiple": 60
+  },
+  "imported_by_business": {
+    "product-thinking": 70,
+    "digital-transformation": 70,
+    "cloud-native": 70
+  },
+  "skipped_duplicates_sample": [],
+  "final_total": 1086,
+  "final_by_type": {
+    "single": 753,
+    "multiple": 333
+  },
+  "final_by_business": {
+    "product-design": 111,
+    "AA": 74,
+    "IA": 42,
+    "data-governance": 135,
+    "BA": 420,
+    "digital-transformation": 164,
+    "product-thinking": 70,
+    "cloud-native": 70
+  },
+  "validation": {
+    "answer_errors": 0
+  },
+  "existing_fixes": [
+    {
+      "id": "q0736",
+      "fix": "判断题答案修正为B，并更新解析"
+    },
+    {
+      "id": "q0750",
+      "fix": "判断题答案修正为B，分类调整为digital-transformation，并更新解析"
+    }
+  ]
+}
