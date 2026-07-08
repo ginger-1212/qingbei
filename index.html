@@ -144,6 +144,11 @@
       color: var(--red);
     }
 
+    .entry:nth-child(5) .entry-mark {
+      background: #edf0f2;
+      color: #415049;
+    }
+
     .entry-title {
       display: block;
       font-size: 20px;
@@ -531,6 +536,46 @@
       color: var(--muted);
       line-height: 1.6;
     }
+    .backup-panel {
+      display: grid;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .backup-panel h2 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.25;
+    }
+
+    .backup-panel p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .backup-text {
+      width: 100%;
+      min-height: 132px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfb;
+      color: var(--text);
+      padding: 12px;
+      font: 13px/1.5 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    }
+
+    .backup-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
 
     .toast {
       position: fixed;
@@ -629,6 +674,14 @@
           </span>
           <span class="chevron">›</span>
         </button>
+        <button class="entry" data-view="backup">
+          <span class="entry-mark">备</span>
+          <span>
+            <span class="entry-title">数据备份</span>
+            <span class="entry-sub">导出或导入刷题记录</span>
+          </span>
+          <span class="chevron">›</span>
+        </button>
       </div>
     </section>
 
@@ -671,6 +724,24 @@
         <span></span>
       </header>
       <div id="mistakeContent" class="quiz-wrap"></div>
+    </section>
+    <section id="backup" class="view" aria-label="数据备份">
+      <header class="topbar">
+        <button class="icon-btn" data-view="home" aria-label="返回首页">‹</button>
+        <div class="topbar-title">数据备份</div>
+        <span></span>
+      </header>
+      <div class="backup-panel">
+        <h2>导出 / 导入</h2>
+        <p>用于保留收藏、错题本和刷题记录。导入会合并数据，不会清空已有收藏和错题。</p>
+        <textarea id="backupText" class="backup-text" autocomplete="off" spellcheck="false" placeholder="备份码会显示在这里，也可以粘贴备份码"></textarea>
+        <div class="backup-actions">
+          <button class="primary" data-action="exportData">导出</button>
+          <button class="secondary" data-action="copyBackup">复制</button>
+          <button class="primary" data-action="importData">导入合并</button>
+          <button class="secondary" data-action="clearBackup">清空</button>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -21180,7 +21251,8 @@
     const ALL_FILTERS = [...TYPE_FILTERS, ...BUSINESS_FILTERS];
 
     const STORE_KEY = "examPracticeState.v3";
-    const defaultState = {
+    const BACKUP_PREFIX = "EXAM_STATE_V1:";
+        const defaultState = {
       activeFilterKey: null,
       quizPositions: {},
       quizOrders: {},
@@ -21204,6 +21276,7 @@
     const quizResumeText = document.querySelector("#quizResumeText");
     const favoriteResumeText = document.querySelector("#favoriteResumeText");
     const mistakeResumeText = document.querySelector("#mistakeResumeText");
+    const backupText = document.querySelector("#backupText");
     const quizTitle = document.querySelector("#quizTitle");
     const toast = document.querySelector("#toast");
 
@@ -21231,21 +21304,25 @@
     function loadState() {
       try {
         const saved = JSON.parse(localStorage.getItem(STORE_KEY)) || JSON.parse(localStorage.getItem("examPracticeState.v1"));
-        if (!saved || typeof saved !== "object") return cloneDefaultState();
-        return {
-          activeFilterKey: typeof saved.activeFilterKey === "string" ? saved.activeFilterKey : null,
-          quizPositions: saved.quizPositions && typeof saved.quizPositions === "object" ? saved.quizPositions : { all: clampNumber(saved.quizIndex || 0, 0, questions.length - 1) },
-          quizOrders: saved.quizOrders && typeof saved.quizOrders === "object" ? saved.quizOrders : {},
-          favoriteIndex: clampNumber(saved.favoriteIndex, 0, Math.max(0, questions.length - 1)),
-          mistakeIndex: clampNumber(saved.mistakeIndex, 0, Math.max(0, questions.length - 1)),
-          favorites: Array.isArray(saved.favorites) ? saved.favorites.filter(id => questions.some(q => q.id === id)) : [],
-          mistakes: normalizeMistakes(saved.mistakes),
-          answers: saved.answers && typeof saved.answers === "object" ? saved.answers : {},
-          mistakeAnswers: saved.mistakeAnswers && typeof saved.mistakeAnswers === "object" ? saved.mistakeAnswers : {}
-        };
+        return normalizeSavedState(saved);
       } catch {
         return cloneDefaultState();
       }
+    }
+
+    function normalizeSavedState(saved) {
+      if (!saved || typeof saved !== "object") return cloneDefaultState();
+      return {
+        activeFilterKey: typeof saved.activeFilterKey === "string" ? saved.activeFilterKey : null,
+        quizPositions: saved.quizPositions && typeof saved.quizPositions === "object" ? saved.quizPositions : { all: clampNumber(saved.quizIndex || 0, 0, questions.length - 1) },
+        quizOrders: saved.quizOrders && typeof saved.quizOrders === "object" ? saved.quizOrders : {},
+        favoriteIndex: clampNumber(saved.favoriteIndex, 0, Math.max(0, questions.length - 1)),
+        mistakeIndex: clampNumber(saved.mistakeIndex, 0, Math.max(0, questions.length - 1)),
+        favorites: Array.isArray(saved.favorites) ? mergeQuestionIdLists(saved.favorites) : [],
+        mistakes: normalizeMistakes(saved.mistakes),
+        answers: saved.answers && typeof saved.answers === "object" ? saved.answers : {},
+        mistakeAnswers: saved.mistakeAnswers && typeof saved.mistakeAnswers === "object" ? saved.mistakeAnswers : {}
+      };
     }
 
     function cloneDefaultState() {
@@ -21282,6 +21359,10 @@
       if (action === "prev") moveQuestion(-1);
       if (action === "next") moveQuestion(1);
       if (action === "removeFavorite") removeFavorite(value);
+      if (action === "exportData") exportData();
+      if (action === "copyBackup") copyBackup();
+      if (action === "importData") importData();
+      if (action === "clearBackup" && backupText) backupText.value = "";
       renderAll();
     }
 
@@ -21755,6 +21836,114 @@
       }
     }
 
+    function exportData() {
+      if (!backupText) return;
+      const payload = {
+        app: "exam-practice",
+        version: 1,
+        storeKey: STORE_KEY,
+        exportedAt: new Date().toISOString(),
+        state: normalizeSavedState(state)
+      };
+      backupText.value = encodeBackupPayload(payload);
+      backupText.focus();
+      backupText.select();
+      showToast("已生成备份码");
+    }
+
+    function copyBackup() {
+      if (!backupText || !backupText.value.trim()) {
+        showToast("请先导出备份码");
+        return;
+      }
+      const value = backupText.value.trim();
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(value).then(() => showToast("已复制备份码")).catch(copyBackupFallback);
+      } else {
+        copyBackupFallback();
+      }
+    }
+
+    function copyBackupFallback() {
+      if (!backupText) return;
+      backupText.focus();
+      backupText.select();
+      try {
+        document.execCommand("copy");
+        showToast("已复制备份码");
+      } catch {
+        showToast("请手动复制备份码");
+      }
+    }
+
+    function importData() {
+      if (!backupText) return;
+      const raw = backupText.value.trim();
+      if (!raw) {
+        showToast("请先粘贴备份码");
+        return;
+      }
+      try {
+        const payload = decodeBackupPayload(raw);
+        const imported = normalizeSavedState(payload.state || payload);
+        state = mergeStates(state, imported);
+        saveState();
+        renderAll();
+        showToast("已导入并合并");
+        showView("home");
+      } catch {
+        showToast("备份码无法识别");
+      }
+    }
+
+    function mergeStates(current, imported) {
+      const base = normalizeSavedState(current);
+      const incoming = normalizeSavedState(imported);
+      return {
+        activeFilterKey: incoming.activeFilterKey || base.activeFilterKey,
+        quizPositions: { ...base.quizPositions, ...incoming.quizPositions },
+        quizOrders: { ...base.quizOrders, ...incoming.quizOrders },
+        favoriteIndex: incoming.favoriteIndex || base.favoriteIndex,
+        mistakeIndex: incoming.mistakeIndex || base.mistakeIndex,
+        favorites: mergeQuestionIdLists(incoming.favorites, base.favorites),
+        mistakes: mergeMistakeMaps(base.mistakes, incoming.mistakes),
+        answers: { ...base.answers, ...incoming.answers },
+        mistakeAnswers: { ...base.mistakeAnswers, ...incoming.mistakeAnswers }
+      };
+    }
+
+    function mergeQuestionIdLists(...lists) {
+      const ids = new Set(questions.map(question => question.id));
+      const merged = [];
+      lists.flat().forEach((id) => {
+        if (ids.has(id) && !merged.includes(id)) merged.push(id);
+      });
+      return merged;
+    }
+
+    function mergeMistakeMaps(base, incoming) {
+      const merged = { ...normalizeMistakes(base) };
+      Object.entries(normalizeMistakes(incoming)).forEach(([id, item]) => {
+        const current = merged[id] || { correctCount: 0 };
+        merged[id] = { correctCount: Math.max(current.correctCount || 0, item.correctCount || 0) };
+      });
+      return merged;
+    }
+
+    function encodeBackupPayload(payload) {
+      const bytes = new TextEncoder().encode(JSON.stringify(payload));
+      let binary = "";
+      bytes.forEach(byte => binary += String.fromCharCode(byte));
+      return BACKUP_PREFIX + btoa(binary);
+    }
+
+    function decodeBackupPayload(value) {
+      const raw = value.startsWith(BACKUP_PREFIX) ? value.slice(BACKUP_PREFIX.length) : value;
+      if (raw.trim().startsWith("{")) return JSON.parse(raw);
+      const binary = atob(raw);
+      const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+      return JSON.parse(new TextDecoder().decode(bytes));
+    }
     function clampNumber(value, min, max) {
       const number = Number.isFinite(value) ? value : Number(value);
       if (!Number.isFinite(number)) return min;
