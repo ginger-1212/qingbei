@@ -21720,10 +21720,17 @@
 
     function resetQuizRound(filterKey) {
       const list = filteredQuestions(filterKey);
+      clearQuizAnswers(list);
       state.quizOrders[filterKey] = shuffleIds(list.map(question => question.id));
       state.quizPositions[filterKey] = 0;
     }
 
+    function clearQuizAnswers(list) {
+      if (!state.answers || typeof state.answers !== "object") state.answers = {};
+      list.forEach((question) => {
+        delete state.answers[question.id];
+      });
+    }
     function shuffleIds(ids) {
       const shuffled = [...ids];
       for (let i = shuffled.length - 1; i > 0; i -= 1) {
