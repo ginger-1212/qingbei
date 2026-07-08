@@ -558,6 +558,29 @@
       font-size: 13px;
       line-height: 1.55;
     }
+    .sync-input {
+      width: 100%;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfb;
+      color: var(--text);
+      padding: 0 12px;
+      font-size: 15px;
+    }
+
+    .sync-status {
+      min-height: 20px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .sync-divider {
+      height: 1px;
+      background: var(--line);
+      margin: 4px 0;
+    }
 
     .backup-text {
       width: 100%;
@@ -732,8 +755,19 @@
         <span></span>
       </header>
       <div class="backup-panel">
-        <h2>保存当前记录</h2>
-        <p>先在手机端导出保存码，再到电脑端导入合并。收藏、错题本和刷题记录都会保留。</p>
+        <h2>云同步</h2>
+        <p>手机和电脑填写同一个同步码，就能自动同步收藏、错题本和刷题记录。</p>
+        <input id="syncUserInput" class="sync-input" autocomplete="off" placeholder="输入同步码，例如 qingbei001">
+        <div class="backup-actions">
+          <button class="primary" data-action="bindSync">启用同步</button>
+          <button class="secondary" data-action="pullCloud">拉取云端</button>
+          <button class="primary" data-action="pushCloud">保存到云端</button>
+          <button class="secondary" data-action="clearSync">取消同步</button>
+        </div>
+        <div id="syncStatus" class="sync-status">未启用云同步</div>
+        <div class="sync-divider"></div>
+        <h2>保存码备份</h2>
+        <p>如果网络不可用，可以先在手机端导出保存码，再到电脑端导入合并。</p>
         <textarea id="backupText" class="backup-text" autocomplete="off" spellcheck="false" placeholder="备份码会显示在这里，也可以粘贴备份码"></textarea>
         <div class="backup-actions">
           <button class="primary" data-action="exportData">导出保存码</button>
@@ -21252,6 +21286,7 @@
 
     const STORE_KEY = "examPracticeState.v3";
     const BACKUP_PREFIX = "EXAM_STATE_V1:";
+    const SYNC_USER_KEY = "examPracticeSyncUser.v1";
         const defaultState = {
       activeFilterKey: null,
       quizPositions: {},
@@ -21267,6 +21302,9 @@
     let state = loadState();
     let currentView = "home";
     let toastTimer = null;
+    let syncUser = loadSyncUser();
+    let cloudSaveTimer = null;
+    let applyingRemoteState = false;
 
     const views = Array.from(document.querySelectorAll(".view"));
     const quizContent = document.querySelector("#quizContent");
@@ -21277,6 +21315,8 @@
     const favoriteResumeText = document.querySelector("#favoriteResumeText");
     const mistakeResumeText = document.querySelector("#mistakeResumeText");
     const backupText = document.querySelector("#backupText");
+    const syncUserInput = document.querySelector("#syncUserInput");
+    const syncStatus = document.querySelector("#syncStatus");
     const quizTitle = document.querySelector("#quizTitle");
     const toast = document.querySelector("#toast");
 
@@ -21300,6 +21340,7 @@
     });
 
     renderAll();
+    initializeSync();
 
     function loadState() {
       try {
@@ -21332,6 +21373,7 @@
     function saveState() {
       localStorage.setItem(STORE_KEY, JSON.stringify(state));
       updateHomeResume();
+      if (!applyingRemoteState) scheduleCloudSave();
     }
 
     function showView(viewName) {
@@ -21363,6 +21405,10 @@
       if (action === "copyBackup") copyBackup();
       if (action === "importData") importData();
       if (action === "clearBackup" && backupText) backupText.value = "";
+      if (action === "bindSync") bindSync();
+      if (action === "pullCloud") pullCloudState(true, true);
+      if (action === "pushCloud") saveCloudState(true);
+      if (action === "clearSync") clearSync();
       renderAll();
     }
 
@@ -21843,6 +21889,110 @@
       }
     }
 
+    function loadSyncUser() {
+      try {
+        return (localStorage.getItem(SYNC_USER_KEY) || "").trim();
+      } catch {
+        return "";
+      }
+    }
+
+    function initializeSync() {
+      if (syncUserInput) syncUserInput.value = syncUser;
+      updateSyncStatus();
+      if (syncUser) pullCloudState(false, true);
+    }
+
+    function bindSync() {
+      if (!syncUserInput) return;
+      const value = syncUserInput.value.trim();
+      if (!isValidSyncUser(value)) {
+        showToast("同步码需为3-40位字母数字");
+        return;
+      }
+      syncUser = value;
+      localStorage.setItem(SYNC_USER_KEY, syncUser);
+      updateSyncStatus("正在合并云端记录...");
+      pullCloudState(true, true);
+    }
+
+    function clearSync() {
+      syncUser = "";
+      localStorage.removeItem(SYNC_USER_KEY);
+      if (syncUserInput) syncUserInput.value = "";
+      updateSyncStatus("已取消云同步，本机记录仍保留");
+      showToast("已取消同步");
+    }
+
+    function isValidSyncUser(value) {
+      return /^[A-Za-z0-9_-]{3,40}$/.test(value || "");
+    }
+
+    function updateSyncStatus(message) {
+      if (!syncStatus) return;
+      syncStatus.textContent = message || (syncUser ? `已启用同步码：${syncUser}` : "未启用云同步");
+    }
+
+    async function pullCloudState(manual = false, uploadAfter = false) {
+      if (!syncUser) {
+        if (manual) showToast("请先输入同步码");
+        return;
+      }
+      try {
+        updateSyncStatus("正在拉取云端记录...");
+        const response = await fetch(`/api/state?user=${encodeURIComponent(syncUser)}`, { cache: "no-store" });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) throw new Error(payload.error || "pull_failed");
+        if (payload.state) {
+          applyingRemoteState = true;
+          state = mergeStates(state, payload.state);
+          saveState();
+          applyingRemoteState = false;
+          renderAll();
+        }
+        updateSyncStatus(payload.updatedAt ? `已同步云端：${formatTime(payload.updatedAt)}` : "云端暂无记录，将保存本机记录");
+        if (uploadAfter) await saveCloudState(false);
+        if (manual) showToast("已拉取并合并");
+      } catch {
+        applyingRemoteState = false;
+        updateSyncStatus("云同步连接失败，本机记录仍可使用");
+        if (manual) showToast("云同步失败");
+      }
+    }
+
+    async function saveCloudState(manual = false) {
+      if (!syncUser) {
+        if (manual) showToast("请先输入同步码");
+        return;
+      }
+      try {
+        updateSyncStatus("正在保存到云端...");
+        const response = await fetch("/api/state", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user: syncUser, state: normalizeSavedState(state) })
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) throw new Error(payload.error || "save_failed");
+        updateSyncStatus(`已保存云端：${formatTime(payload.updatedAt)}`);
+        if (manual) showToast("已保存到云端");
+      } catch {
+        updateSyncStatus("云端保存失败，稍后会继续尝试");
+        if (manual) showToast("保存云端失败");
+      }
+    }
+
+    function scheduleCloudSave() {
+      if (!syncUser) return;
+      clearTimeout(cloudSaveTimer);
+      cloudSaveTimer = setTimeout(() => saveCloudState(false), 900);
+    }
+
+    function formatTime(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "刚刚";
+      return date.toLocaleString("zh-CN", { hour12: false });
+    }
     function exportData() {
       if (!backupText) return;
       const payload = {

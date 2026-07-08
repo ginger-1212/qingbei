@@ -21,3 +21,7 @@ tail_extract.txt
 
 # Local backups
 index_导入题库前备份.html
+
+# Runtime sync database
+data/
+*.sqlite3
