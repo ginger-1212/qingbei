@@ -677,8 +677,8 @@
         <button class="entry" data-view="backup">
           <span class="entry-mark">备</span>
           <span>
-            <span class="entry-title">数据备份</span>
-            <span class="entry-sub">导出或导入刷题记录</span>
+            <span class="entry-title">保存/同步</span>
+            <span class="entry-sub">保存手机记录，导入到电脑</span>
           </span>
           <span class="chevron">›</span>
         </button>
@@ -725,19 +725,19 @@
       </header>
       <div id="mistakeContent" class="quiz-wrap"></div>
     </section>
-    <section id="backup" class="view" aria-label="数据备份">
+    <section id="backup" class="view" aria-label="保存同步">
       <header class="topbar">
         <button class="icon-btn" data-view="home" aria-label="返回首页">‹</button>
-        <div class="topbar-title">数据备份</div>
+        <div class="topbar-title">保存/同步</div>
         <span></span>
       </header>
       <div class="backup-panel">
-        <h2>导出 / 导入</h2>
-        <p>用于保留收藏、错题本和刷题记录。导入会合并数据，不会清空已有收藏和错题。</p>
+        <h2>保存当前记录</h2>
+        <p>先在手机端导出保存码，再到电脑端导入合并。收藏、错题本和刷题记录都会保留。</p>
         <textarea id="backupText" class="backup-text" autocomplete="off" spellcheck="false" placeholder="备份码会显示在这里，也可以粘贴备份码"></textarea>
         <div class="backup-actions">
-          <button class="primary" data-action="exportData">导出</button>
-          <button class="secondary" data-action="copyBackup">复制</button>
+          <button class="primary" data-action="exportData">导出保存码</button>
+          <button class="secondary" data-action="copyBackup">复制保存码</button>
           <button class="primary" data-action="importData">导入合并</button>
           <button class="secondary" data-action="clearBackup">清空</button>
         </div>
