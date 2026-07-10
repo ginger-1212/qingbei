@@ -85,7 +85,7 @@ def merge_state(base: object, incoming: object) -> dict:
     merged.update(incoming)
     merged["favorites"] = merge_unique(base.get("favorites"), incoming.get("favorites"))
     merged["mistakes"] = merge_mistakes(base.get("mistakes"), incoming.get("mistakes"))
-    for key in ("quizPositions", "quizOrders", "answers", "favoriteAnswers", "mistakeAnswers"):
+    for key in ("quizPositions", "quizOrders", "quizBatchOffsets", "answers", "favoriteAnswers", "mistakeAnswers"):
         merged[key] = merge_dict(base.get(key), incoming.get(key))
     return merged
 

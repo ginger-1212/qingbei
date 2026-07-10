@@ -540,6 +540,45 @@
       line-height: 1.45;
     }
 
+    .batch-panel {
+      display: grid;
+      gap: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .batch-panel h2 {
+      margin: 0;
+      font-size: 19px;
+      line-height: 1.35;
+    }
+
+    .batch-summary {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .batch-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .batch-option {
+      min-height: 58px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--blue-soft);
+      color: var(--blue);
+      font-size: 16px;
+      font-weight: 760;
+    }
+
     .empty {
       flex: 1;
       display: grid;
@@ -21299,10 +21338,13 @@
     const STORE_KEY = "examPracticeState.v3";
     const BACKUP_PREFIX = "EXAM_STATE_V1:";
     const SYNC_USER_KEY = "examPracticeSyncUser.v1";
+    const BATCH_SIZES = [20, 50, 100, 200, "all"];
         const defaultState = {
       activeFilterKey: null,
+      activeBatch: null,
       quizPositions: {},
       quizOrders: {},
+      quizBatchOffsets: {},
       favoriteIndex: 0,
       mistakeIndex: 0,
       favorites: [],
@@ -21368,8 +21410,10 @@
       if (!saved || typeof saved !== "object") return cloneDefaultState();
       return {
         activeFilterKey: typeof saved.activeFilterKey === "string" ? saved.activeFilterKey : null,
+        activeBatch: normalizeActiveBatch(saved.activeBatch),
         quizPositions: saved.quizPositions && typeof saved.quizPositions === "object" ? saved.quizPositions : { all: clampNumber(saved.quizIndex || 0, 0, questions.length - 1) },
         quizOrders: saved.quizOrders && typeof saved.quizOrders === "object" ? saved.quizOrders : {},
+        quizBatchOffsets: saved.quizBatchOffsets && typeof saved.quizBatchOffsets === "object" ? saved.quizBatchOffsets : {},
         favoriteIndex: clampNumber(saved.favoriteIndex, 0, Math.max(0, questions.length - 1)),
         mistakeIndex: clampNumber(saved.mistakeIndex, 0, Math.max(0, questions.length - 1)),
         favorites: Array.isArray(saved.favorites) ? mergeQuestionIdLists(saved.favorites) : [],
@@ -21393,7 +21437,10 @@
     function showView(viewName) {
       currentView = viewName;
       views.forEach((view) => view.classList.toggle("active", view.id === viewName));
-      if (viewName === "quiz") state.activeFilterKey = null;
+      if (viewName === "quiz") {
+        state.activeFilterKey = null;
+        state.activeBatch = null;
+      }
       if (viewName === "favorite") {
         const favs = favoriteQuestions();
         state.favoriteIndex = clampNumber(state.favoriteIndex, 0, Math.max(0, favs.length - 1));
@@ -21409,6 +21456,8 @@
 
     function handleAction(action, value) {
       if (action === "startPractice") startPractice(value);
+      if (action === "chooseBatch") chooseBatch(value);
+      if (action === "resetPracticeRound") resetPracticeRound(value);
       if (action === "quizBack") backFromQuiz();
       if (action === "select") selectOption(value);
       if (action === "confirm") confirmAnswer();
@@ -21431,14 +21480,50 @@
       const filter = findFilter(filterKey);
       if (!filter) return;
       state.activeFilterKey = filterKey;
+      state.activeBatch = null;
       ensureQuizOrder(filterKey);
-      state.quizPositions[filterKey] = clampNumber(state.quizPositions[filterKey] || 0, 0, Math.max(0, activeQuizQuestions().length - 1));
+      clampQuizBatchOffset(filterKey);
+      saveState();
+    }
+
+    function chooseBatch(value) {
+      const [filterKey, sizeValue] = String(value || "").split("|");
+      if (!findFilter(filterKey)) return;
+      state.activeFilterKey = filterKey;
+      ensureQuizOrder(filterKey);
+      const ordered = orderedQuizQuestions(filterKey);
+      const total = ordered.length;
+      const start = quizBatchOffset(filterKey, total);
+      if (!total || start >= total) return;
+      const requested = sizeValue === "all" ? total - start : clampNumber(sizeValue, 1, total);
+      const end = Math.min(start + requested, total);
+      state.activeBatch = {
+        filterKey,
+        ids: ordered.slice(start, end).map(question => question.id),
+        start,
+        end,
+        total
+      };
+      state.quizBatchOffsets[filterKey] = end;
+      state.quizPositions[filterKey] = 0;
+      saveState();
+    }
+
+    function resetPracticeRound(filterKey) {
+      if (!findFilter(filterKey)) return;
+      resetQuizRound(filterKey);
+      state.activeFilterKey = filterKey;
+      state.activeBatch = null;
+      showToast("已重新随机出题");
       saveState();
     }
 
     function backFromQuiz() {
-      if (state.activeFilterKey) {
+      if (state.activeFilterKey && hasActiveBatch()) {
+        state.activeBatch = null;
+      } else if (state.activeFilterKey) {
         state.activeFilterKey = null;
+        state.activeBatch = null;
       } else {
         showView("home");
         return;
@@ -21479,13 +21564,14 @@
     }
 
     function moveQuestion(delta) {
-      if (currentView === "quiz" && state.activeFilterKey) {
+      if (currentView === "quiz" && state.activeFilterKey && hasActiveBatch()) {
         const list = activeQuizQuestions();
         const key = state.activeFilterKey;
         const current = activeQuizIndex();
         if (delta > 0 && list.length && current >= list.length - 1) {
-          resetQuizRound(key);
-          showToast("\u5df2\u91cd\u65b0\u968f\u673a\u51fa\u9898");
+          state.activeBatch = null;
+          state.quizPositions[key] = 0;
+          showToast("本组已完成");
         } else {
           state.quizPositions[key] = clampNumber(current + delta, 0, Math.max(0, list.length - 1));
         }
@@ -21554,22 +21640,28 @@
       }
 
       const filter = findFilter(state.activeFilterKey);
-      const list = activeQuizQuestions();
-      const index = activeQuizIndex();
+      const allList = orderedQuizQuestions(state.activeFilterKey);
       quizTitle.textContent = filter ? filter.label : "刷题";
-      favoriteToggle.style.visibility = "visible";
-      quizContent.className = "quiz-wrap";
+      favoriteToggle.style.visibility = hasActiveBatch() ? "visible" : "hidden";
+      quizContent.className = hasActiveBatch() ? "quiz-wrap" : "category-wrap";
 
-      if (!list.length) {
+      if (!allList.length) {
         quizContent.innerHTML = `<div class="empty"><div class="placeholder-box"><h2>暂无题目</h2><p>这个分类下还没有题目，后续导入题库后会自动显示。</p></div></div>`;
         return;
       }
 
+      if (!hasActiveBatch()) {
+        quizContent.innerHTML = renderBatchPicker(state.activeFilterKey);
+        return;
+      }
+
+      const list = activeQuizQuestions();
+      const index = activeQuizIndex();
       quizContent.innerHTML = renderQuestion({
         question: list[index],
         index,
         total: list.length,
-        progressPrefix: "第",
+        progressPrefix: "本次第",
         mode: "quiz"
       });
     }
@@ -21593,9 +21685,40 @@
 
     function renderCategoryCard(filter) {
       const list = filteredQuestions(filter.key);
-      const position = clampNumber(state.quizPositions[filter.key] || 0, 0, Math.max(0, list.length - 1));
-      const detail = list.length ? `共 ${list.length} 题，继续第 ${position + 1} 题` : "暂无题目";
+      const remaining = quizRemaining(filter.key, list.length);
+      const detail = list.length ? `共 ${list.length} 题，剩余 ${remaining} 题未进入批次` : "暂无题目";
       return `<button class="category-card" data-action="startPractice" data-value="${filter.key}"><strong>${escapeHtml(filter.label)}</strong><span>${detail}</span></button>`;
+    }
+
+    function renderBatchPicker(filterKey) {
+      const filter = findFilter(filterKey);
+      const list = orderedQuizQuestions(filterKey);
+      const total = list.length;
+      const offset = quizBatchOffset(filterKey, total);
+      const remaining = Math.max(0, total - offset);
+      if (!remaining) {
+        return `
+          <section class="batch-panel">
+            <h2>${escapeHtml(filter ? filter.label : "刷题")}</h2>
+            <p class="batch-summary">本分类 ${total} 题已全部进入过批次。重新开始会随机打乱题目顺序，并清空本分类普通刷题答案。</p>
+            <button class="primary" data-action="resetPracticeRound" data-value="${filterKey}">重新随机开始</button>
+          </section>
+        `;
+      }
+      return `
+        <section class="batch-panel">
+          <h2>${escapeHtml(filter ? filter.label : "刷题")}</h2>
+          <p class="batch-summary">共 ${total} 题，已进入批次 ${offset} 题，剩余 ${remaining} 题。本次选择题量后，将从第 ${offset + 1} 题开始。</p>
+          <div class="batch-options">
+            ${BATCH_SIZES.map(size => renderBatchOption(filterKey, size, remaining)).join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderBatchOption(filterKey, size, remaining) {
+      const label = size === "all" ? `全部 ${remaining} 题` : `${Math.min(size, remaining)} 题`;
+      return `<button class="batch-option" data-action="chooseBatch" data-value="${filterKey}|${size}">${label}</button>`;
     }
 
     function renderFavorite() {
@@ -21675,7 +21798,7 @@
         : "";
       const nextDisabled = mode === "favorite" && index === total - 1;
       const nextLabel = mode === "quiz" && index === total - 1
-        ? "\u518d\u5237\u4e00\u904d"
+        ? "完成本组"
         : mode === "mistakes" && index === total - 1
           ? "再做一遍"
           : "\u4e0b\u4e00\u9898";
@@ -21743,7 +21866,7 @@
 
     function updateFavoriteButton() {
       const question = activeQuestion();
-      if (!question || currentView !== "quiz" || !state.activeFilterKey) {
+      if (!question || currentView !== "quiz" || !state.activeFilterKey || !hasActiveBatch()) {
         favoriteToggle.style.visibility = "hidden";
         return;
       }
@@ -21766,14 +21889,25 @@
     }
 
     function activeQuestion() {
-      if (currentView === "quiz" && state.activeFilterKey) return activeQuizQuestions()[activeQuizIndex()];
+      if (currentView === "quiz" && state.activeFilterKey && hasActiveBatch()) return activeQuizQuestions()[activeQuizIndex()];
       if (currentView === "favorite") return favoriteQuestions()[state.favoriteIndex];
       if (currentView === "mistakes") return mistakeQuestions()[state.mistakeIndex];
       return null;
     }
 
     function activeQuizQuestions() {
-      return orderedQuizQuestions(state.activeFilterKey);
+      if (!hasActiveBatch()) return [];
+      const byId = new Map(orderedQuizQuestions(state.activeFilterKey).map(question => [question.id, question]));
+      return state.activeBatch.ids.map(id => byId.get(id)).filter(Boolean);
+    }
+
+    function hasActiveBatch() {
+      return Boolean(
+        state.activeBatch &&
+        state.activeBatch.filterKey === state.activeFilterKey &&
+        Array.isArray(state.activeBatch.ids) &&
+        state.activeBatch.ids.length
+      );
     }
 
     function orderedQuizQuestions(filterKey) {
@@ -21794,7 +21928,9 @@
       const valid = current.length === ids.length && ids.every(id => currentSet.has(id));
       if (!valid) {
         state.quizOrders[filterKey] = shuffleIds(ids);
-        state.quizPositions[filterKey] = clampNumber(state.quizPositions[filterKey] || 0, 0, Math.max(0, ids.length - 1));
+        state.quizPositions[filterKey] = 0;
+        state.quizBatchOffsets[filterKey] = 0;
+        if (state.activeBatch && state.activeBatch.filterKey === filterKey) state.activeBatch = null;
       }
     }
 
@@ -21803,6 +21939,8 @@
       clearQuizAnswers(list);
       state.quizOrders[filterKey] = shuffleIds(list.map(question => question.id));
       state.quizPositions[filterKey] = 0;
+      state.quizBatchOffsets[filterKey] = 0;
+      if (state.activeBatch && state.activeBatch.filterKey === filterKey) state.activeBatch = null;
     }
 
     function clearQuizAnswers(list) {
@@ -21825,8 +21963,37 @@
       return clampNumber(state.quizPositions[state.activeFilterKey] || 0, 0, Math.max(0, list.length - 1));
     }
 
+    function quizBatchOffset(filterKey, total = filteredQuestions(filterKey).length) {
+      if (!state.quizBatchOffsets || typeof state.quizBatchOffsets !== "object") state.quizBatchOffsets = {};
+      return clampNumber(state.quizBatchOffsets[filterKey] || 0, 0, Math.max(0, total));
+    }
+
+    function clampQuizBatchOffset(filterKey) {
+      const total = filteredQuestions(filterKey).length;
+      state.quizBatchOffsets[filterKey] = quizBatchOffset(filterKey, total);
+    }
+
+    function quizRemaining(filterKey, total = filteredQuestions(filterKey).length) {
+      return Math.max(0, total - quizBatchOffset(filterKey, total));
+    }
+
+    function normalizeActiveBatch(batch) {
+      if (!batch || typeof batch !== "object") return null;
+      if (typeof batch.filterKey !== "string" || !findFilter(batch.filterKey)) return null;
+      if (!Array.isArray(batch.ids)) return null;
+      const ids = mergeQuestionIdLists(batch.ids);
+      if (!ids.length) return null;
+      return {
+        filterKey: batch.filterKey,
+        ids,
+        start: clampNumber(batch.start || 0, 0, questions.length),
+        end: clampNumber(batch.end || ids.length, 0, questions.length),
+        total: clampNumber(batch.total || 0, 0, questions.length)
+      };
+    }
+
     function clampActiveQuizPosition() {
-      if (!state.activeFilterKey) return;
+      if (!state.activeFilterKey || !hasActiveBatch()) return;
       const list = activeQuizQuestions();
       state.quizPositions[state.activeFilterKey] = activeQuizIndex();
       if (!list.length) state.quizPositions[state.activeFilterKey] = 0;
@@ -22102,8 +22269,10 @@
       const incoming = normalizeSavedState(imported);
       return {
         activeFilterKey: incoming.activeFilterKey || base.activeFilterKey,
+        activeBatch: incoming.activeBatch || base.activeBatch,
         quizPositions: { ...base.quizPositions, ...incoming.quizPositions },
         quizOrders: { ...base.quizOrders, ...incoming.quizOrders },
+        quizBatchOffsets: { ...base.quizBatchOffsets, ...incoming.quizBatchOffsets },
         favoriteIndex: incoming.favoriteIndex || base.favoriteIndex,
         mistakeIndex: incoming.mistakeIndex || base.mistakeIndex,
         favorites: mergeQuestionIdLists(incoming.favorites, base.favorites),
