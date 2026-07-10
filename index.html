@@ -284,22 +284,24 @@
 
     .question {
       margin: 0;
-      font-size: 19px;
+      font-size: 18px;
       line-height: 1.55;
       font-weight: 700;
     }
 
     .multi-badge {
-      display: inline-grid;
-      place-items: center;
-      width: 22px;
-      height: 22px;
-      margin-right: 7px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 38px;
+      height: 24px;
+      margin-right: 8px;
+      padding: 0 8px;
       border-radius: 6px;
       background: var(--gold-soft);
       color: var(--gold);
       border: 1px solid #efcf92;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
       line-height: 1;
       vertical-align: 2px;
@@ -21296,6 +21298,7 @@
       favorites: [],
       mistakes: {},
       answers: {},
+      favoriteAnswers: {},
       mistakeAnswers: {}
     };
 
@@ -21362,6 +21365,7 @@
         favorites: Array.isArray(saved.favorites) ? mergeQuestionIdLists(saved.favorites) : [],
         mistakes: normalizeMistakes(saved.mistakes),
         answers: saved.answers && typeof saved.answers === "object" ? saved.answers : {},
+        favoriteAnswers: saved.favoriteAnswers && typeof saved.favoriteAnswers === "object" ? saved.favoriteAnswers : {},
         mistakeAnswers: saved.mistakeAnswers && typeof saved.mistakeAnswers === "object" ? saved.mistakeAnswers : {}
       };
     }
@@ -21401,6 +21405,7 @@
       if (action === "prev") moveQuestion(-1);
       if (action === "next") moveQuestion(1);
       if (action === "removeFavorite") removeFavorite(value);
+      if (action === "clearMistakes") clearMistakes();
       if (action === "exportData") exportData();
       if (action === "copyBackup") copyBackup();
       if (action === "importData") importData();
@@ -21506,9 +21511,18 @@
 
     function removeFavorite(questionId) {
       state.favorites = state.favorites.filter(id => id !== questionId);
+      resetFavoriteAnswer(questionId);
       const favs = favoriteQuestions();
       state.favoriteIndex = clampNumber(state.favoriteIndex, 0, Math.max(0, favs.length - 1));
       showToast("已移除收藏");
+      saveState();
+    }
+
+    function clearMistakes() {
+      state.mistakes = {};
+      state.mistakeAnswers = {};
+      state.mistakeIndex = 0;
+      showToast("\u5df2\u6e05\u7a7a\u9519\u9898\u672c");
       saveState();
     }
 
@@ -21638,13 +21652,16 @@
       const confirmButton = question.type === "multiple"
         ? `<button class="primary full-row" data-action="confirm" ${revealed ? "disabled" : ""}>确认多选答案</button>`
         : "";
-      const multiBadge = question.type === "multiple" ? `<span class="multi-badge" aria-label="多选题">多</span>` : "";
+      const multiBadge = question.type === "multiple" ? `<span class="multi-badge" aria-label="\u591a\u9009\u9898">\u591a\u9009</span>` : "";
       const otherAnswer = question.type === "other"
         ? `<div class="answer-box"><strong>参考答案</strong><p>${escapeHtml(question.answerText || "")}</p><p>${escapeHtml(question.analysis || "")}</p></div>`
         : "";
       const mistake = state.mistakes && state.mistakes[question.id];
       const mistakeTip = mode === "mistakes"
         ? `<div class="mistake-tip">已答对 ${mistake ? mistake.correctCount || 0 : 0} / 2 次，答对 2 次后自动移出错题本。</div>`
+        : "";
+      const clearMistakesButton = mode === "mistakes"
+        ? `<button class="danger full-row" data-action="clearMistakes">\u5168\u90e8\u79fb\u9664\u9519\u9898</button>`
         : "";
       const nextDisabled = mode === "favorite" && index === total - 1;
       const nextLabel = mode === "quiz" && index === total - 1
@@ -21670,6 +21687,7 @@
           <button class="primary" data-action="next" ${nextDisabled ? "disabled" : ""}>${nextLabel}</button>
           ${confirmButton}
           ${removeButton}
+          ${clearMistakesButton}
         </div>
       `;
     }
@@ -21822,7 +21840,11 @@
     }
 
     function answerRecord(questionId, mode = currentView) {
-      const store = mode === "mistakes" ? state.mistakeAnswers : state.answers;
+      const store = mode === "mistakes"
+        ? state.mistakeAnswers
+        : mode === "favorite"
+          ? state.favoriteAnswers
+          : state.answers;
       if (!store[questionId]) {
         store[questionId] = { selected: [], revealed: false };
       }
@@ -21886,6 +21908,12 @@
     function resetMistakeAnswer(questionId) {
       if (state.mistakeAnswers && state.mistakeAnswers[questionId]) {
         delete state.mistakeAnswers[questionId];
+      }
+    }
+
+    function resetFavoriteAnswer(questionId) {
+      if (state.favoriteAnswers && state.favoriteAnswers[questionId]) {
+        delete state.favoriteAnswers[questionId];
       }
     }
 
@@ -22065,6 +22093,7 @@
         favorites: mergeQuestionIdLists(incoming.favorites, base.favorites),
         mistakes: mergeMistakeMaps(base.mistakes, incoming.mistakes),
         answers: { ...base.answers, ...incoming.answers },
+        favoriteAnswers: { ...base.favoriteAnswers, ...incoming.favoriteAnswers },
         mistakeAnswers: { ...base.mistakeAnswers, ...incoming.mistakeAnswers }
       };
     }
